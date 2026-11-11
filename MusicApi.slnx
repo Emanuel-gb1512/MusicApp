@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MusicApi.Api/MusicApi.Api.csproj" />
+    <Project Path="src/MusicApi.Application/MusicApi.Application.csproj" />
+    <Project Path="src/MusicApi.Domain/MusicApi.Domain.csproj" />
+    <Project Path="src/MusicApi.Infrastructure/MusicApi.Infrastructure.csproj" />
+  </Folder>
+</Solution>

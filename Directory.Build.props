@@ -1,0 +1,11 @@
+<Project>
+
+  <!-- Propiedades comunes a TODOS los proyectos de la solución. -->
+  <PropertyGroup>
+    <Product>TONYX</Product>
+    <Company>TONYX</Company>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
