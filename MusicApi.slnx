@@ -7,6 +7,8 @@
   </Folder>
   <Folder Name="/database/">
     <File Path="database/.gitkeep" />
+    <File Path="database/001_create_database.sql" />
+    <File Path="database/002_identity_and_sessions.sql" />
   </Folder>
   <Folder Name="/docs/">
     <File Path="docs/.gitkeep" />
