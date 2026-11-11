@@ -1,8 +1,23 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/database/">
+    <File Path="database/.gitkeep" />
+  </Folder>
+  <Folder Name="/docs/">
+    <File Path="docs/.gitkeep" />
+  </Folder>
   <Folder Name="/src/">
-    <Project Path="src/MusicApi.Api/MusicApi.Api.csproj" />
-    <Project Path="src/MusicApi.Application/MusicApi.Application.csproj" />
     <Project Path="src/MusicApi.Domain/MusicApi.Domain.csproj" />
+    <Project Path="src/MusicApi.Application/MusicApi.Application.csproj" />
     <Project Path="src/MusicApi.Infrastructure/MusicApi.Infrastructure.csproj" />
+    <Project Path="src/MusicApi.Api/MusicApi.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <File Path="tests/.gitkeep" />
   </Folder>
 </Solution>
