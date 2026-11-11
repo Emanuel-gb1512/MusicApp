@@ -10,6 +10,7 @@
     <File Path="database/001_create_database.sql" />
     <File Path="database/002_identity_and_sessions.sql" />
     <File Path="database/003_providers_and_external_accounts.sql" />
+    <File Path="database/004_music_catalog.sql" />
   </Folder>
   <Folder Name="/docs/">
     <File Path="docs/.gitkeep" />
