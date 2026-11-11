@@ -9,6 +9,7 @@
     <File Path="database/.gitkeep" />
     <File Path="database/001_create_database.sql" />
     <File Path="database/002_identity_and_sessions.sql" />
+    <File Path="database/003_providers_and_external_accounts.sql" />
   </Folder>
   <Folder Name="/docs/">
     <File Path="docs/.gitkeep" />
