@@ -1,8 +1,9 @@
 // Punto de entrada de MusicApi (backend de TONYX).
-// En tareas posteriores añadiremos aquí: autenticación, CORS,
+// En tareas posteriores añadiremos aquí: autenticación JWT, CORS,
 // rate limiting, manejo centralizado de excepciones, etc.
 
 using Microsoft.OpenApi;
+using MusicApi.Application.Settings;
 using MusicApi.Infrastructure;
 using Serilog;
 using Serilog.Events;
@@ -39,7 +40,12 @@ try
             "Falta ConnectionStrings:DefaultConnection. Configúrala con 'dotnet user-secrets set'.");
     }
 
-    builder.Services.AddInfrastructure(connectionString);
+    // JWT: Issuer y Audience vienen de appsettings; la clave de firma, de user-secrets.
+    var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
+                     ?? new JwtOptions();
+    jwtOptions.Validate();
+
+    builder.Services.AddInfrastructure(connectionString, jwtOptions);
 
     // Habilita el uso de controladores (clases en la carpeta Controllers).
     builder.Services.AddControllers();
