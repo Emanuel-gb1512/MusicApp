@@ -2,7 +2,10 @@
 // En tareas posteriores añadiremos aquí: autenticación JWT, CORS,
 // rate limiting, manejo centralizado de excepciones, etc.
 
+using System.Text.Json.Serialization;
+using FluentValidation;
 using Microsoft.OpenApi;
+using MusicApi.Application.Auth;
 using MusicApi.Application.Settings;
 using MusicApi.Infrastructure;
 using Serilog;
@@ -47,8 +50,15 @@ try
 
     builder.Services.AddInfrastructure(connectionString, jwtOptions);
 
-    // Habilita el uso de controladores (clases en la carpeta Controllers).
-    builder.Services.AddControllers();
+    // Validadores de las solicitudes de autenticación.
+    builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
+    builder.Services.AddScoped<IValidator<LoginRequest>, LoginRequestValidator>();
+
+    // Habilita el uso de controladores. Los enumerados se escriben con su nombre
+    // ("Android", "Windows"...) y no distinguen mayúsculas.
+    builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
     // Swagger / OpenAPI (Swashbuckle).
     builder.Services.AddEndpointsApiExplorer();

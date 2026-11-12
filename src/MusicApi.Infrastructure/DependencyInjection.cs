@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using MusicApi.Application.Interfaces;
 using MusicApi.Application.Settings;
+using MusicApi.Infrastructure.Auth;
 using MusicApi.Infrastructure.Persistence;
 using MusicApi.Infrastructure.Security;
 
@@ -21,6 +23,9 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
 
+        // Reloj del sistema (se puede sustituir en las pruebas).
+        services.TryAddSingleton(TimeProvider.System);
+
         services.AddScoped<IDatabaseHealthService, DatabaseHealthService>();
 
         // Seguridad: no guardan estado, por eso son singleton.
@@ -28,6 +33,9 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordService, PasswordService>();
         services.AddSingleton<ISecureTokenService, SecureTokenService>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
+
+        // Autenticación: usa la base de datos, por eso es scoped (uno por petición).
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
