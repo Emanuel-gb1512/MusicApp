@@ -17,4 +17,6 @@ public sealed record DatabaseHealthResult(
     int? LatestScriptNumber,
     string? LatestScriptName,
     int ProviderCount,
-    int GenreCount);
+    int GenreCount,
+    int UserCount,
+    int IdentityTablesChecked);

@@ -5,7 +5,7 @@ using MusicApi.Application.Interfaces;
 namespace MusicApi.Infrastructure.Persistence;
 
 /// <summary>
-/// Comprueba la conexión con SQL Server y lee unos pocos datos de prueba.
+/// Comprueba la conexión con SQL Server y que los mapeos de EF coinciden con las tablas.
 /// </summary>
 public sealed class DatabaseHealthService(
     AppDbContext db,
@@ -18,7 +18,7 @@ public sealed class DatabaseHealthService(
             if (!await db.Database.CanConnectAsync(cancellationToken))
             {
                 logger.LogWarning("No se pudo conectar con la base de datos.");
-                return new DatabaseHealthResult(false, null, null, null, 0, 0);
+                return Failed();
             }
 
             var latest = await db.SchemaVersions
@@ -28,6 +28,17 @@ public sealed class DatabaseHealthService(
 
             var providerCount = await db.ConnectedProviders.AsNoTracking().CountAsync(cancellationToken);
             var genreCount = await db.Genres.AsNoTracking().CountAsync(cancellationToken);
+            var userCount = await db.Users.AsNoTracking().CountAsync(cancellationToken);
+
+            // Lee una fila (o ninguna) de cada tabla de identidad. Si un mapeo no coincide
+            // con una columna real, SQL Server lanza "Invalid column name" y queda en el log.
+            await db.Users.AsNoTracking().OrderBy(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            await db.UserProfiles.AsNoTracking().OrderBy(x => x.UserId).FirstOrDefaultAsync(cancellationToken);
+            await db.UserDevices.AsNoTracking().OrderBy(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            await db.UserSessions.AsNoTracking().OrderBy(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            await db.RefreshTokens.AsNoTracking().OrderBy(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            await db.EmailVerificationTokens.AsNoTracking().OrderBy(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            await db.PasswordResetTokens.AsNoTracking().OrderBy(x => x.Id).FirstOrDefaultAsync(cancellationToken);
 
             return new DatabaseHealthResult(
                 Connected: true,
@@ -35,13 +46,18 @@ public sealed class DatabaseHealthService(
                 LatestScriptNumber: latest?.ScriptNumber,
                 LatestScriptName: latest?.ScriptName,
                 ProviderCount: providerCount,
-                GenreCount: genreCount);
+                GenreCount: genreCount,
+                UserCount: userCount,
+                IdentityTablesChecked: 7);
         }
         catch (Exception ex)
         {
-            // Por ejemplo: faltan tablas porque no se ejecutaron todos los scripts.
+            // Por ejemplo: faltan tablas o un mapeo no coincide con una columna.
             logger.LogError(ex, "Error al comprobar la base de datos.");
-            return new DatabaseHealthResult(false, null, null, null, 0, 0);
+            return Failed();
         }
     }
+
+    private static DatabaseHealthResult Failed() =>
+        new(false, null, null, null, 0, 0, 0, 0);
 }

@@ -9,9 +9,19 @@ namespace MusicApi.Infrastructure.Persistence;
 /// </summary>
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    // Versionado y catálogo de proveedores / géneros
     public DbSet<SchemaVersion> SchemaVersions => Set<SchemaVersion>();
     public DbSet<ConnectedProvider> ConnectedProviders => Set<ConnectedProvider>();
     public DbSet<Genre> Genres => Set<Genre>();
+
+    // Identidad y sesiones (script 002)
+    public DbSet<User> Users => Set<User>();
+    public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<UserDevice> UserDevices => Set<UserDevice>();
+    public DbSet<UserSession> UserSessions => Set<UserSession>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
