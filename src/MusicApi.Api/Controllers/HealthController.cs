@@ -1,14 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
+using MusicApi.Application.Interfaces;
 
 namespace MusicApi.Api.Controllers;
 
 /// <summary>
-/// Comprobaciones de estado: sirven para saber si la API está viva
-/// y si su configuración se cargó correctamente.
+/// Comprobaciones de estado: sirven para saber si la API está viva,
+/// si su configuración se cargó y si la base de datos responde.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class HealthController(IConfiguration configuration, IWebHostEnvironment environment) : ControllerBase
+public class HealthController(
+    IConfiguration configuration,
+    IWebHostEnvironment environment,
+    IDatabaseHealthService databaseHealth) : ControllerBase
 {
     /// <summary>Devuelve el estado actual del servicio.</summary>
     /// <response code="200">La API está funcionando.</response>
@@ -43,6 +47,30 @@ public class HealthController(IConfiguration configuration, IWebHostEnvironment 
             environment.EnvironmentName,
             appName,
             connectionConfigured));
+    }
+
+    /// <summary>
+    /// Comprueba que la API puede hablar con SQL Server (solo en Development).
+    /// </summary>
+    /// <response code="200">La base de datos responde.</response>
+    /// <response code="404">No disponible fuera de Development.</response>
+    /// <response code="503">No se pudo conectar con la base de datos.</response>
+    [HttpGet("database")]
+    [ProducesResponseType(typeof(DatabaseHealthResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(DatabaseHealthResult), StatusCodes.Status503ServiceUnavailable)]
+    public async Task<ActionResult<DatabaseHealthResult>> GetDatabase(CancellationToken cancellationToken)
+    {
+        if (!environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        var result = await databaseHealth.CheckAsync(cancellationToken);
+
+        return result.Connected
+            ? Ok(result)
+            : StatusCode(StatusCodes.Status503ServiceUnavailable, result);
     }
 }
 

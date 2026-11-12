@@ -1,8 +1,9 @@
 // Punto de entrada de MusicApi (backend de TONYX).
-// En tareas posteriores añadiremos aquí: base de datos, autenticación,
-// CORS, rate limiting, manejo centralizado de excepciones, etc.
+// En tareas posteriores añadiremos aquí: autenticación, CORS,
+// rate limiting, manejo centralizado de excepciones, etc.
 
 using Microsoft.OpenApi;
+using MusicApi.Infrastructure;
 using Serilog;
 using Serilog.Events;
 
@@ -29,6 +30,16 @@ try
             path: "logs/musicapi-.log",
             rollingInterval: RollingInterval.Day,
             retainedFileCountLimit: 14));
+
+    // Base de datos: la cadena de conexión viene de user-secrets (nunca del código).
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (string.IsNullOrWhiteSpace(connectionString))
+    {
+        throw new InvalidOperationException(
+            "Falta ConnectionStrings:DefaultConnection. Configúrala con 'dotnet user-secrets set'.");
+    }
+
+    builder.Services.AddInfrastructure(connectionString);
 
     // Habilita el uso de controladores (clases en la carpeta Controllers).
     builder.Services.AddControllers();
