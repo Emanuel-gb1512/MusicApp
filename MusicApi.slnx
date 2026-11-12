@@ -12,6 +12,7 @@
     <File Path="database/003_providers_and_external_accounts.sql" />
     <File Path="database/004_music_catalog.sql" />
     <File Path="database/005_user_data.sql" />
+    <File Path="database/006_sync_backup_audit.sql" />
   </Folder>
   <Folder Name="/docs/">
     <File Path="docs/.gitkeep" />
