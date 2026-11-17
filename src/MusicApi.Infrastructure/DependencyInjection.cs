@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using MusicApi.Application.Interfaces;
 using MusicApi.Application.Settings;
 using MusicApi.Infrastructure.Auth;
+using MusicApi.Infrastructure.Messaging;
 using MusicApi.Infrastructure.Persistence;
 using MusicApi.Infrastructure.Security;
 
@@ -18,7 +19,8 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
         string connectionString,
-        JwtOptions jwtOptions)
+        JwtOptions jwtOptions,
+        EmailOptions emailOptions)
     {
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
@@ -34,10 +36,31 @@ public static class DependencyInjection
         services.AddSingleton<ISecureTokenService, SecureTokenService>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
+        // Correo: una cola en memoria y un servicio en segundo plano que la vacía.
+        services.AddSingleton(emailOptions);
+        services.AddSingleton<EmailQueue>();
+        services.AddSingleton<IEmailQueue>(sp => sp.GetRequiredService<EmailQueue>());
+
+        if (emailOptions.IsProvider("Smtp"))
+        {
+            services.AddSingleton<IEmailSender, SmtpEmailSender>();
+        }
+        else if (emailOptions.IsProvider("Log"))
+        {
+            services.AddSingleton<IEmailSender, LoggingEmailSender>();
+        }
+        else
+        {
+            services.AddSingleton<IEmailSender, NullEmailSender>();
+        }
+
+        services.AddHostedService<EmailDispatchService>();
+
         // Autenticación y cuenta: usan la base de datos, por eso son scoped (uno por petición).
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ITokenRefreshService, TokenRefreshService>();
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IAccountSecurityService, AccountSecurityService>();
 
         return services;
     }

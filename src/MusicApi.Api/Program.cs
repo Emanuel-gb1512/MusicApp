@@ -52,12 +52,20 @@ try
                      ?? new JwtOptions();
     jwtOptions.Validate();
 
-    builder.Services.AddInfrastructure(connectionString, jwtOptions);
+    // Correo: "Log" (solo Development), "Smtp" (real) o "Disabled".
+    var emailOptions = builder.Configuration.GetSection(EmailOptions.SectionName).Get<EmailOptions>()
+                       ?? new EmailOptions();
+    emailOptions.Validate(builder.Environment.IsDevelopment());
 
-    // Validadores de las solicitudes de autenticación.
+    builder.Services.AddInfrastructure(connectionString, jwtOptions, emailOptions);
+
+    // Validadores de las solicitudes de autenticación y seguridad de la cuenta.
     builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
     builder.Services.AddScoped<IValidator<LoginRequest>, LoginRequestValidator>();
     builder.Services.AddScoped<IValidator<RefreshRequest>, RefreshRequestValidator>();
+    builder.Services.AddScoped<IValidator<VerifyEmailRequest>, VerifyEmailRequestValidator>();
+    builder.Services.AddScoped<IValidator<ForgotPasswordRequest>, ForgotPasswordRequestValidator>();
+    builder.Services.AddScoped<IValidator<ResetPasswordRequest>, ResetPasswordRequestValidator>();
 
     // Autenticación: la API valida el JWT de cada petición protegida.
     builder.Services
