@@ -20,7 +20,8 @@ public static class DependencyInjection
         this IServiceCollection services,
         string connectionString,
         JwtOptions jwtOptions,
-        EmailOptions emailOptions)
+        EmailOptions emailOptions,
+        GoogleOptions googleOptions)
     {
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
@@ -56,11 +57,17 @@ public static class DependencyInjection
 
         services.AddHostedService<EmailDispatchService>();
 
+        // Inicio de sesión con proveedores externos.
+        services.AddSingleton(googleOptions);
+        services.AddSingleton<IGoogleTokenValidator, GoogleTokenValidator>();
+
         // Autenticación y cuenta: usan la base de datos, por eso son scoped (uno por petición).
+        services.AddScoped<SessionIssuer>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ITokenRefreshService, TokenRefreshService>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IAccountSecurityService, AccountSecurityService>();
+        services.AddScoped<IExternalLoginService, ExternalLoginService>();
 
         return services;
     }

@@ -23,6 +23,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
+    // Cuentas vinculadas a proveedores externos (script 003)
+    public DbSet<ExternalAccount> ExternalAccounts => Set<ExternalAccount>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Carga automáticamente todas las clases IEntityTypeConfiguration de este proyecto.

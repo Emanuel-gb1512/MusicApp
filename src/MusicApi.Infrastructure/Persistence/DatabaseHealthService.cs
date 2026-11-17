@@ -39,6 +39,7 @@ public sealed class DatabaseHealthService(
             await db.RefreshTokens.AsNoTracking().OrderBy(x => x.Id).FirstOrDefaultAsync(cancellationToken);
             await db.EmailVerificationTokens.AsNoTracking().OrderBy(x => x.Id).FirstOrDefaultAsync(cancellationToken);
             await db.PasswordResetTokens.AsNoTracking().OrderBy(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            await db.ExternalAccounts.AsNoTracking().OrderBy(x => x.Id).FirstOrDefaultAsync(cancellationToken);
 
             return new DatabaseHealthResult(
                 Connected: true,
@@ -48,7 +49,7 @@ public sealed class DatabaseHealthService(
                 ProviderCount: providerCount,
                 GenreCount: genreCount,
                 UserCount: userCount,
-                IdentityTablesChecked: 7);
+                IdentityTablesChecked: 8);
         }
         catch (Exception ex)
         {

@@ -57,7 +57,11 @@ try
                        ?? new EmailOptions();
     emailOptions.Validate(builder.Environment.IsDevelopment());
 
-    builder.Services.AddInfrastructure(connectionString, jwtOptions, emailOptions);
+    // Google: ID de cliente cuyos tokens se aceptan. Si no hay ninguno, el endpoint responde 503.
+    var googleOptions = builder.Configuration.GetSection(GoogleOptions.SectionName).Get<GoogleOptions>()
+                        ?? new GoogleOptions();
+
+    builder.Services.AddInfrastructure(connectionString, jwtOptions, emailOptions, googleOptions);
 
     // Validadores de las solicitudes de autenticación y seguridad de la cuenta.
     builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
@@ -66,6 +70,7 @@ try
     builder.Services.AddScoped<IValidator<VerifyEmailRequest>, VerifyEmailRequestValidator>();
     builder.Services.AddScoped<IValidator<ForgotPasswordRequest>, ForgotPasswordRequestValidator>();
     builder.Services.AddScoped<IValidator<ResetPasswordRequest>, ResetPasswordRequestValidator>();
+    builder.Services.AddScoped<IValidator<GoogleLoginRequest>, GoogleLoginRequestValidator>();
 
     // Autenticación: la API valida el JWT de cada petición protegida.
     builder.Services
