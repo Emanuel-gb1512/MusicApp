@@ -34,8 +34,10 @@ public static class DependencyInjection
         services.AddSingleton<ISecureTokenService, SecureTokenService>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
-        // Autenticación: usa la base de datos, por eso es scoped (uno por petición).
+        // Autenticación y cuenta: usan la base de datos, por eso son scoped (uno por petición).
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ITokenRefreshService, TokenRefreshService>();
+        services.AddScoped<IAccountService, AccountService>();
 
         return services;
     }
