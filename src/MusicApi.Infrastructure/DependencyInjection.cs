@@ -6,6 +6,7 @@ using MusicApi.Application.Settings;
 using MusicApi.Infrastructure.Auth;
 using MusicApi.Infrastructure.Messaging;
 using MusicApi.Infrastructure.Persistence;
+using MusicApi.Infrastructure.Providers;
 using MusicApi.Infrastructure.Security;
 
 namespace MusicApi.Infrastructure;
@@ -68,6 +69,10 @@ public static class DependencyInjection
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IAccountSecurityService, AccountSecurityService>();
         services.AddScoped<IExternalLoginService, ExternalLoginService>();
+
+        // Proveedores de música. Los adaptadores (Jamendo, Internet Archive...) se registran
+        // aquí como IMusicProvider en las tareas siguientes.
+        services.AddScoped<IProviderCatalogService, ProviderCatalogService>();
 
         return services;
     }
