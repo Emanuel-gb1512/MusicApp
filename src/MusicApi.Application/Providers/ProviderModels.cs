@@ -26,7 +26,11 @@ public sealed record ProviderInfo(
     bool AdapterAvailable,
     bool IsConfigured);
 
-/// <summary>Una canción tal como la describe un proveedor externo.</summary>
+/// <summary>
+/// Una canción tal como la describe un proveedor externo.
+/// StreamUrl es la dirección para reproducirla. DownloadUrl solo existe si el proveedor
+/// y la licencia de ESA pista permiten descargarla (DownloadAllowed).
+/// </summary>
 public sealed record ProviderTrack(
     ExternalProvider Provider,
     string ExternalId,
@@ -37,7 +41,9 @@ public sealed record ProviderTrack(
     string? CoverUrl,
     string? ExternalUrl,
     bool DownloadAllowed,
-    string? License);
+    string? License,
+    string? StreamUrl,
+    string? DownloadUrl);
 
 /// <summary>Un álbum tal como lo describe un proveedor externo.</summary>
 public sealed record ProviderAlbum(

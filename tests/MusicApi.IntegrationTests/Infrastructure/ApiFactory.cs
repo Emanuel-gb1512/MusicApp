@@ -27,6 +27,7 @@ public sealed class ApiFactory : WebApplicationFactory<ApiAssemblyMarker>
         Environment.SetEnvironmentVariable("Jwt__SigningKey", "tonyx-pruebas-de-integracion-clave-de-firma-0123456789-abcdef");
         Environment.SetEnvironmentVariable("Email__Provider", "Disabled");
         Environment.SetEnvironmentVariable("Google__ClientIds__0", "pruebas.apps.googleusercontent.com");
+        Environment.SetEnvironmentVariable("Jamendo__ClientId", "");
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -35,12 +36,15 @@ public sealed class ApiFactory : WebApplicationFactory<ApiAssemblyMarker>
 
         builder.ConfigureTestServices(services =>
         {
-            // Los correos se capturan en memoria y Google se simula.
+            // Los correos se capturan en memoria, y Google y Jamendo se simulan.
             services.RemoveAll<IEmailSender>();
             services.AddSingleton<IEmailSender>(Emails);
 
             services.RemoveAll<IGoogleTokenValidator>();
             services.AddSingleton<IGoogleTokenValidator, FakeGoogleTokenValidator>();
+
+            services.RemoveAll<IMusicProvider>();
+            services.AddSingleton<IMusicProvider, FakeJamendoProvider>();
         });
     }
 

@@ -7,6 +7,7 @@ using MusicApi.Infrastructure.Auth;
 using MusicApi.Infrastructure.Messaging;
 using MusicApi.Infrastructure.Persistence;
 using MusicApi.Infrastructure.Providers;
+using MusicApi.Infrastructure.Providers.Jamendo;
 using MusicApi.Infrastructure.Security;
 
 namespace MusicApi.Infrastructure;
@@ -22,7 +23,8 @@ public static class DependencyInjection
         string connectionString,
         JwtOptions jwtOptions,
         EmailOptions emailOptions,
-        GoogleOptions googleOptions)
+        GoogleOptions googleOptions,
+        JamendoOptions jamendoOptions)
     {
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
@@ -70,9 +72,20 @@ public static class DependencyInjection
         services.AddScoped<IAccountSecurityService, AccountSecurityService>();
         services.AddScoped<IExternalLoginService, ExternalLoginService>();
 
-        // Proveedores de música. Los adaptadores (Jamendo, Internet Archive...) se registran
-        // aquí como IMusicProvider en las tareas siguientes.
+        // Proveedores de música: cada adaptador se registra como IMusicProvider.
+        services.AddSingleton(jamendoOptions);
+
+        services.AddHttpClient<JamendoProvider>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.jamendo.com/v3.0/");
+            client.Timeout = TimeSpan.FromSeconds(10);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("TONYX/0.1");
+        });
+
+        services.AddTransient<IMusicProvider>(sp => sp.GetRequiredService<JamendoProvider>());
+
         services.AddScoped<IProviderCatalogService, ProviderCatalogService>();
+        services.AddScoped<IMusicSearchService, MusicSearchService>();
 
         return services;
     }

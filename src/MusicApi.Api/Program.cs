@@ -10,6 +10,7 @@ using Microsoft.OpenApi;
 using MusicApi.Api.Extensions;
 using MusicApi.Application.Auth;
 using MusicApi.Application.Interfaces;
+using MusicApi.Application.Music;
 using MusicApi.Application.Settings;
 using MusicApi.Infrastructure;
 using Serilog;
@@ -29,9 +30,12 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     // Logger definitivo: consola + archivo diario (se conservan 14 días).
+    // Las llamadas HTTP a proveedores externos se registran solo si fallan: por defecto
+    // escribirían la dirección completa, que incluye claves como el client_id de Jamendo.
     builder.Host.UseSerilog((context, services, loggerConfiguration) => loggerConfiguration
         .MinimumLevel.Information()
         .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+        .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Warning)
         .Enrich.FromLogContext()
         .WriteTo.Console()
         .WriteTo.File(
@@ -61,9 +65,14 @@ try
     var googleOptions = builder.Configuration.GetSection(GoogleOptions.SectionName).Get<GoogleOptions>()
                         ?? new GoogleOptions();
 
-    builder.Services.AddInfrastructure(connectionString, jwtOptions, emailOptions, googleOptions);
+    // Jamendo: client_id (user-secrets) y formato de audio. Sin client_id, Jamendo queda sin configurar.
+    var jamendoOptions = builder.Configuration.GetSection(JamendoOptions.SectionName).Get<JamendoOptions>()
+                         ?? new JamendoOptions();
+    jamendoOptions.Validate();
 
-    // Validadores de las solicitudes de autenticación y seguridad de la cuenta.
+    builder.Services.AddInfrastructure(connectionString, jwtOptions, emailOptions, googleOptions, jamendoOptions);
+
+    // Validadores de las solicitudes de autenticación, seguridad de la cuenta y búsqueda.
     builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
     builder.Services.AddScoped<IValidator<LoginRequest>, LoginRequestValidator>();
     builder.Services.AddScoped<IValidator<RefreshRequest>, RefreshRequestValidator>();
@@ -71,6 +80,7 @@ try
     builder.Services.AddScoped<IValidator<ForgotPasswordRequest>, ForgotPasswordRequestValidator>();
     builder.Services.AddScoped<IValidator<ResetPasswordRequest>, ResetPasswordRequestValidator>();
     builder.Services.AddScoped<IValidator<GoogleLoginRequest>, GoogleLoginRequestValidator>();
+    builder.Services.AddScoped<IValidator<MusicSearchRequest>, MusicSearchRequestValidator>();
 
     // Autenticación: la API valida el JWT de cada petición protegida.
     builder.Services

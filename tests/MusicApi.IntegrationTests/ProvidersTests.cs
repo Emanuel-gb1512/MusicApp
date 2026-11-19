@@ -49,8 +49,11 @@ public class ProvidersTests(ApiFactory factory) : IntegrationTestBase(factory)
         // Google solo sirve para iniciar sesión.
         Assert.Equal(ProviderKind.Identity, providers.Single(p => p.Code == "google").Kind);
 
-        // Todavía no hay ningún adaptador implementado.
-        Assert.All(providers, p => Assert.False(p.AdapterAvailable));
+        // Solo Jamendo tiene adaptador (en las pruebas, uno simulado).
+        var jamendo = providers.Single(p => p.Code == "jamendo");
+        Assert.True(jamendo.AdapterAvailable);
+        Assert.True(jamendo.IsConfigured);
+        Assert.All(providers.Where(p => p.Code != "jamendo"), p => Assert.False(p.AdapterAvailable));
     }
 
     [Fact]

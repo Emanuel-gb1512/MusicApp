@@ -15,8 +15,15 @@ public interface IMusicProvider
     /// <summary>False si faltan claves o datos de configuración (por ejemplo, un client_id).</summary>
     bool IsConfigured { get; }
 
+    /// <exception cref="ProviderUnavailableException">El proveedor no respondió o devolvió un error.</exception>
     Task<ProviderSearchResult> SearchAsync(
         string query,
         int limit,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Devuelve una pista por su identificador en el proveedor, o null si no existe.</summary>
+    /// <exception cref="ProviderUnavailableException">El proveedor no respondió o devolvió un error.</exception>
+    Task<ProviderTrack?> GetTrackAsync(
+        string externalId,
         CancellationToken cancellationToken = default);
 }
