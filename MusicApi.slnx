@@ -26,5 +26,6 @@
   <Folder Name="/tests/">
     <File Path="tests/.gitkeep" />
     <Project Path="tests/MusicApi.UnitTests/MusicApi.UnitTests.csproj" />
+    <Project Path="tests/MusicApi.IntegrationTests/MusicApi.IntegrationTests.csproj" />
   </Folder>
 </Solution>
